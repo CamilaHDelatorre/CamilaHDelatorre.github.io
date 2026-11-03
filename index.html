@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Camila Delatorre - React Front-End Developer in Milan">
+<title>Camila Delatorre</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@500;700;800&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a film grading suite. Dark single-world page, a teal/orange "grade" accent pair,
+   timecode labels, and the career cut as an edit timeline (tracks V1, V2, A1). */
+:root {
+  --bg: #0d1013;
+  --panel: #151a1f;
+  --panel-2: #1c2228;
+  --line: #2a323a;
+  --fg: #ece6dc;
+  --muted: #8f99a3;
+  --teal: #46b8ad;
+  --orange: #e8955c;
+  --display: "Big Shoulders Display", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --body: "Manrope", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; }
+img { max-width: 100%; }
+:root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { animation: none !important; transition: none !important; } }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--body);
+  font-size: 16px;
+  line-height: 1.6;
+}
+body::before {
+  content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px);
+  z-index: 10; background: var(--bg);
+}
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; border-radius: 2px; }
+
+/* Language switching: English by default, Italian when data-lang="it" */
+:root:not([data-lang="it"]) .it { display: none !important; }
+:root[data-lang="it"] .en { display: none !important; }
+
+.wrap {
+  max-width: 1080px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* Top bar */
+.bar {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+.bar .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 12px; }
+.tc { font-family: var(--mono); font-size: 12px; color: var(--muted); letter-spacing: .04em; }
+.tc b { color: var(--orange); font-weight: 500; }
+.nav { display: flex; gap: 20px; align-items: center; }
+.nav a { font-size: 13px; text-decoration: none; color: var(--muted); }
+.nav a:hover { color: var(--fg); }
+@media (max-width: 720px) { .nav a { display: none; } }
+.lang { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 2px; }
+.lang button {
+  font: 500 12px var(--mono); letter-spacing: .06em; color: var(--muted);
+  background: none; border: 0; padding: 5px 12px; border-radius: 999px; cursor: pointer;
+}
+.lang button[aria-pressed="true"] { background: var(--fg); color: var(--bg); }
+
+/* Hero */
+.hero { padding-block: 72px 40px; }
+.slate { display: flex; flex-wrap: wrap; gap: 8px 24px; font-family: var(--mono); font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+.slate span b { color: var(--fg); font-weight: 500; }
+h1 {
+  font-family: var(--display); font-weight: 800; text-transform: uppercase;
+  font-size: clamp(64px, 14vw, 168px); line-height: .86; letter-spacing: -.005em;
+  margin: 20px 0 0; text-wrap: balance;
+}
+h1 .last {
+  display: block;
+  background: linear-gradient(90deg, var(--teal) 0%, #9fb3a0 45%, var(--orange) 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.role { font-family: var(--display); font-weight: 500; font-size: clamp(24px, 3.4vw, 34px); letter-spacing: .02em; margin: 18px 0 0; }
+.lede { max-width: 60ch; color: var(--muted); font-size: 18px; margin: 16px 0 0; }
+.lede strong { color: var(--fg); font-weight: 600; }
+.cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px; text-decoration: none;
+  font-weight: 600; font-size: 14px; padding: 11px 18px; border-radius: 6px;
+  border: 1px solid var(--line); background: var(--panel); color: var(--fg);
+}
+.btn.primary { background: var(--orange); border-color: var(--orange); color: #1a1008; }
+.btn:hover { border-color: var(--muted); }
+.btn.primary:hover { filter: brightness(1.06); }
+
+/* Grade strip under hero: a scrubber with timecode ticks */
+.scrub { margin-top: 48px; }
+.scrub .strip { height: 10px; border-radius: 2px; background: linear-gradient(90deg, #12343a, var(--teal) 30%, #c9c2a8 55%, var(--orange) 80%, #5a2c17); }
+.scrub .ticks { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 8px; }
+
+/* Sections */
+section { padding-block: 64px; border-top: 1px solid var(--line); }
+.head { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; margin-bottom: 32px; }
+h2 { font-family: var(--display); font-weight: 700; text-transform: uppercase; font-size: clamp(36px, 5vw, 52px); line-height: 1; margin: 0; letter-spacing: .01em; }
+.head .tc { text-transform: uppercase; }
+
+.about { display: grid; grid-template-columns: 1.4fr 1fr; gap: 48px; }
+.about > * { min-width: 0; }
+.about p { margin: 0 0 16px; max-width: 62ch; }
+.facts { display: grid; gap: 0; align-content: start; border-top: 1px solid var(--line); }
+.fact { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+.fact dt { color: var(--muted); font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; padding-top: 2px; }
+.fact dd { margin: 0; text-align: right; font-weight: 600; }
+@media (max-width: 760px) { .about { grid-template-columns: 1fr; gap: 32px; } }
+
+/* Edit timeline */
+.nle { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow-x: auto; }
+.nle-inner { min-width: 860px; padding: 16px 16px 20px; position: relative; }
+.ruler { position: relative; height: 22px; margin-left: 56px; border-bottom: 1px solid var(--line); }
+.ruler span { position: absolute; top: 0; font-family: var(--mono); font-size: 11px; color: var(--muted); transform: translateX(-50%); }
+.ruler span::after { content: ""; position: absolute; left: 50%; top: 16px; width: 1px; height: 6px; background: var(--line); }
+.track { display: flex; align-items: center; height: 46px; border-bottom: 1px dashed var(--line); }
+.track .label { width: 56px; flex: none; font-family: var(--mono); font-size: 11px; color: var(--muted); line-height: 1.2; }
+.track .label b { display: block; color: var(--fg); font-weight: 500; }
+.lane { position: relative; flex: 1; height: 32px; }
+.clip {
+  position: absolute; top: 0; height: 32px; border-radius: 3px; padding: 0 8px;
+  font-size: 12px; font-weight: 600; line-height: 32px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  border: 1px solid rgba(255,255,255,.12);
+}
+.clip.code { background: color-mix(in srgb, var(--teal) 30%, var(--panel-2)); border-color: var(--teal); }
+.clip.film { background: color-mix(in srgb, var(--orange) 28%, var(--panel-2)); border-color: var(--orange); }
+.clip.study { background: var(--panel-2); border-color: var(--muted); color: var(--fg); }
+.playhead { position: absolute; top: 12px; bottom: 12px; width: 2px; background: var(--orange); margin-left: 56px; pointer-events: none; }
+.playhead::before { content: ""; position: absolute; top: 0; left: -5px; border: 6px solid transparent; border-top-color: var(--orange); }
+.nle-legend { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 14px; font-size: 13px; color: var(--muted); }
+.nle-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+
+/* Experience list */
+.jobs { display: grid; gap: 0; margin-top: 40px; }
+.job { display: grid; grid-template-columns: 180px 1fr; gap: 24px; padding-block: 28px; border-top: 1px solid var(--line); }
+.job > * { min-width: 0; }
+.when { font-family: var(--mono); font-size: 12px; color: var(--muted); letter-spacing: .03em; }
+.when .place { display: block; margin-top: 4px; }
+.job h3 { font-family: var(--display); font-weight: 700; font-size: 28px; line-height: 1.05; margin: 0; letter-spacing: .01em; }
+.job .co { color: var(--teal); font-weight: 600; margin-top: 4px; }
+.job.film .co { color: var(--orange); }
+.job ul { margin: 14px 0 0; padding-left: 18px; display: grid; gap: 6px; max-width: 70ch; }
+.job li::marker { color: var(--muted); }
+@media (max-width: 640px) { .job { grid-template-columns: 1fr; gap: 10px; } }
+
+/* Skills */
+.skills { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.skill { background: var(--panel); padding: 22px; min-width: 0; }
+.skill h3 { font-family: var(--mono); font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 12px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font-size: 13px; padding: 4px 10px; border-radius: 4px; background: var(--panel-2); border: 1px solid var(--line); }
+@media (max-width: 860px) { .skills { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px) { .skills { grid-template-columns: 1fr; } }
+
+/* Education + languages */
+.two { display: grid; grid-template-columns: 1.3fr 1fr; gap: 48px; }
+.two > * { min-width: 0; }
+@media (max-width: 760px) { .two { grid-template-columns: 1fr; } }
+.edu { display: grid; gap: 0; }
+.edu-item { padding-block: 18px; border-top: 1px solid var(--line); }
+.edu-item h3 { margin: 0; font-size: 18px; }
+.edu-item p { margin: 6px 0 0; color: var(--muted); font-size: 14px; max-width: 60ch; }
+.langs { display: grid; gap: 18px; }
+.lg-row { display: grid; gap: 6px; }
+.lg-top { display: flex; justify-content: space-between; font-size: 15px; font-weight: 600; }
+.lg-top span:last-child { font-family: var(--mono); font-size: 12px; color: var(--muted); font-weight: 400; }
+.meter { height: 6px; border-radius: 3px; background: var(--panel-2); overflow: hidden; }
+.meter i { display: block; height: 100%; background: linear-gradient(90deg, var(--teal), var(--orange)); }
+
+/* Contact */
+.contact h2 { font-size: clamp(44px, 8vw, 96px); }
+.contact .lede { margin-bottom: 32px; }
+.cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+@media (max-width: 640px) { .cards { grid-template-columns: 1fr; } }
+.card { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 18px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; min-width: 0; }
+.card .k { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.card .v { font-weight: 600; overflow-wrap: anywhere; user-select: all; }
+.card a.v { text-decoration: none; }
+.card a.v:hover { color: var(--teal); }
+.copy { flex: none; font: 500 12px var(--mono); color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); border-radius: 4px; padding: 6px 10px; cursor: pointer; }
+.copy:hover { border-color: var(--muted); }
+footer { padding-block: 32px 48px; border-top: 1px solid var(--line); }
+footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="wrap">
+    <div class="tc">TC <b id="tc">01:00:00:00</b> · CD_REEL_2026</div>
+    <nav class="nav" aria-label="Sections">
+      <a href="#about"><span class="en">About</span><span class="it">Profilo</span></a>
+      <a href="#experience"><span class="en">Experience</span><span class="it">Esperienza</span></a>
+      <a href="#skills"><span class="en">Skills</span><span class="it">Competenze</span></a>
+      <a href="#contact"><span class="en">Contact</span><span class="it">Contatti</span></a>
+      <div class="lang" role="group" aria-label="Language">
+        <button type="button" id="btn-en" data-set="en" aria-pressed="true">EN</button>
+        <button type="button" id="btn-it" data-set="it" aria-pressed="false">IT</button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap hero">
+    <div class="slate">
+      <span><span class="en">Scene</span><span class="it">Scena</span> <b>01</b></span>
+      <span><span class="en">Location</span><span class="it">Luogo</span> <b>Milano, IT</b></span>
+      <span><span class="en">Status</span><span class="it">Stato</span> <b><span class="en">Open to work</span><span class="it">Disponibile</span></b></span>
+    </div>
+    <h1>Camila <span class="last">Delatorre</span></h1>
+    <p class="role">React Front-End Developer</p>
+    <p class="lede en">I build web and mobile interfaces with <strong>React and TypeScript</strong>. Before code, I graded and edited films in Buenos Aires and Bogotá, so I care about every pixel on screen.</p>
+    <p class="lede it">Sviluppo interfacce web e mobile con <strong>React e TypeScript</strong>. Prima del codice ho fatto color grading e montaggio di film a Buenos Aires e Bogotá: per questo curo ogni pixel sullo schermo.</p>
+    <div class="cta">
+      <a class="btn primary" href="#contact"><span class="en">Get in touch</span><span class="it">Contattami</span></a>
+      <a class="btn" href="https://github.com/Cami094" target="_blank" rel="noopener">GitHub ↗</a>
+      <a class="btn" href="https://www.linkedin.com/in/camila-delatorre-b55925175/" target="_blank" rel="noopener">LinkedIn ↗</a>
+    </div>
+    <div class="scrub" aria-hidden="true">
+      <div class="strip"></div>
+      <div class="ticks"><span>00:00</span><span>02:24</span><span>04:48</span><span>07:12</span><span>09:36</span><span>12:00</span></div>
+    </div>
+  </div>
+
+  <section id="about">
+    <div class="wrap">
+      <div class="head"><h2><span class="en">About</span><span class="it">Profilo</span></h2><span class="tc">01:00:12:04</span></div>
+      <div class="about">
+        <div>
+          <div class="en">
+            <p>Front-end developer with 5+ years of experience building web and mobile applications, specialized in React and TypeScript.</p>
+            <p>At Plenitude I design reusable, scalable components inside an NX monorepo, applying object-oriented principles and design patterns to keep the code maintainable. I work in Agile teams with sprint planning and code reviews, and I also contribute beyond the front end: AWS data flows, CI/CD deployments, SQL and NoSQL integrations, and iOS and Android releases.</p>
+            <p>My background in web design, UI/UX and film post-production helps me turn requirements into polished, functional interfaces.</p>
+          </div>
+          <div class="it">
+            <p>Front-end developer con oltre 5 anni di esperienza nello sviluppo di applicazioni web e mobile, specializzata in React e TypeScript.</p>
+            <p>In Plenitude progetto componenti riutilizzabili e scalabili all'interno di un monorepo NX, applicando i principi Object-Oriented e i principali Design Pattern per garantire codice manutenibile. Lavoro in team Agile tra sprint planning e code review, e contribuisco anche oltre il front-end: flussi dati su AWS, deploy CI/CD, integrazioni SQL e NoSQL, rilasci iOS e Android.</p>
+            <p>Il background da web designer, UI/UX e post-produzione video mi permette di tradurre i requisiti in interfacce curate e funzionali.</p>
+          </div>
+        </div>
+        <dl class="facts">
+          <div class="fact"><dt><span class="en">Based in</span><span class="it">Sede</span></dt><dd>Milano, Italia</dd></div>
+          <div class="fact"><dt><span class="en">Currently</span><span class="it">Attualmente</span></dt><dd>Plenitude</dd></div>
+          <div class="fact"><dt><span class="en">Experience</span><span class="it">Esperienza</span></dt><dd><span class="en">5+ years in development</span><span class="it">5+ anni nello sviluppo</span></dd></div>
+          <div class="fact"><dt><span class="en">Work mode</span><span class="it">Modalità</span></dt><dd><span class="en">On-site · Hybrid · Remote</span><span class="it">In sede · Ibrido · Remoto</span></dd></div>
+          <div class="fact"><dt><span class="en">Languages</span><span class="it">Lingue</span></dt><dd>ES · IT · EN</dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section id="experience">
+    <div class="wrap">
+      <div class="head"><h2><span class="en">The cut</span><span class="it">Il montaggio</span></h2><span class="tc">01:02:30:18</span></div>
+
+      <div class="nle" role="img" aria-label="Career timeline 2015 to 2026: film post-production 2016 to 2019, web design 2019 to 2020, software development at Plenitude since 2021">
+        <div class="nle-inner">
+          <div class="ruler">
+            <span style="left:0%">2015</span><span style="left:8.333%">16</span><span style="left:16.667%">17</span><span style="left:25%">18</span><span style="left:33.333%">19</span><span style="left:41.667%">20</span><span style="left:50%">21</span><span style="left:58.333%">22</span><span style="left:66.667%">23</span><span style="left:75%">24</span><span style="left:83.333%">25</span><span style="left:91.667%">26</span>
+          </div>
+          <div class="track"><div class="label"><b>V2</b>code</div><div class="lane">
+            <div class="clip code" style="left:34.72%;width:9.72%" title="AWO · Web Designer · 2019–2020">AWO</div>
+            <div class="clip code" style="left:44.44%;width:4.86%" title="Lorenzo Marini · Web Designer · 2020">Lorenzo Marini</div>
+            <div class="clip code" style="left:54.17%;width:45.14%" title="Plenitude · Software Developer · 2021–today">Plenitude · Software Developer</div>
+          </div></div>
+          <div class="track"><div class="label"><b>V1</b>film</div><div class="lane">
+            <div class="clip film" style="left:9.72%;width:31.95%" title="Bull Frame · Colorist & Video Editor · 2016–2019">Bull Frame · Colorist &amp; Editor</div>
+          </div></div>
+          <div class="track"><div class="label"><b>A1</b><span class="en">study</span><span class="it">studio</span></div><div class="lane">
+            <div class="clip study" style="left:0%;width:30.56%" title="Universidad del Cine · 2015–2018">Universidad del Cine</div>
+            <div class="clip study" style="left:41.67%;width:3.47%" title="Epicode · Front-end · 2020">Epicode</div>
+            <div class="clip study" style="left:80.56%;width:2.78%" title="Talent Garden · AWS & DevOps · 2024">TAG</div>
+          </div></div>
+          <div class="playhead" style="left:calc((100% - 32px - 56px) * .9931 + 16px)"></div>
+        </div>
+      </div>
+      <div class="nle-legend">
+        <span><i style="background:var(--teal)"></i><span class="en">Software &amp; web</span><span class="it">Software e web</span></span>
+        <span><i style="background:var(--orange)"></i><span class="en">Film post-production</span><span class="it">Post-produzione video</span></span>
+        <span><i style="background:var(--muted)"></i><span class="en">Education</span><span class="it">Formazione</span></span>
+      </div>
+
+      <div class="jobs">
+        <article class="job">
+          <div class="when"><span class="en">Jul 2021 – today</span><span class="it">Lug 2021 – oggi</span><span class="place">Milano</span></div>
+          <div>
+            <h3><span class="en">Software Developer</span><span class="it">Sviluppatrice software</span></h3>
+            <div class="co">Plenitude</div>
+            <ul class="en">
+              <li>Develop and maintain React + TypeScript web apps with reusable components and state management.</li>
+              <li>Build responsive interfaces with Ant Design and StyleX in a multi-project NX monorepo.</li>
+              <li>Apply OOP principles and design patterns for maintainable, scalable code.</li>
+              <li>Build AWS data flows (Lambda, Step Functions) deployed through CI/CD; integrate SQL and NoSQL databases.</li>
+              <li>Support iOS and Android development, from design to store release.</li>
+              <li>Maintain Java applications and write technical documentation (flow diagrams, API specs).</li>
+            </ul>
+            <ul class="it">
+              <li>Sviluppo e manutenzione di applicazioni web in React e TypeScript, con componenti riutilizzabili e gestione dello stato.</li>
+              <li>Interfacce responsive con Ant Design e StyleX in un monorepo multi-progetto gestito con NX.</li>
+              <li>Principi Object-Oriented e Design Pattern per codice manutenibile e scalabile.</li>
+              <li>Flussi dati su AWS (Lambda, Step Functions) con deploy CI/CD; integrazione con database SQL e NoSQL.</li>
+              <li>Supporto allo sviluppo di app iOS e Android, dalla progettazione alla pubblicazione negli store.</li>
+              <li>Manutenzione di applicazioni Java e documentazione tecnica (diagrammi di flusso, specifiche API).</li>
+            </ul>
+          </div>
+        </article>
+        <article class="job">
+          <div class="when"><span class="en">May – Nov 2020</span><span class="it">Mag – Nov 2020</span><span class="place">Milano</span></div>
+          <div>
+            <h3><span class="en">Web Designer (Internship)</span><span class="it">Web designer (Stage)</span></h3>
+            <div class="co">Lorenzo Marini</div>
+            <ul class="en">
+              <li>Designed and built responsive sites in HTML5, CSS3 and JavaScript, with a focus on UI/UX and cross-browser support.</li>
+              <li>Took web projects from concept to launch, including on WordPress.</li>
+              <li>Used Google Analytics and Search Console to improve the user experience.</li>
+            </ul>
+            <ul class="it">
+              <li>Progettazione e sviluppo di siti responsive in HTML5, CSS3 e JavaScript, con attenzione a UI/UX e compatibilità cross-browser.</li>
+              <li>Gestione di progetti web dalla concezione alla messa online, anche su WordPress.</li>
+              <li>Analisi con Google Analytics e Search Console per migliorare l'esperienza utente.</li>
+            </ul>
+          </div>
+        </article>
+        <article class="job">
+          <div class="when"><span class="en">Mar 2019 – Apr 2020</span><span class="it">Mar 2019 – Apr 2020</span><span class="place">Berlin</span></div>
+          <div>
+            <h3>Web Designer</h3>
+            <div class="co">AWO</div>
+            <ul class="en">
+              <li>Built responsive websites in HTML5, CSS3 and JavaScript with a focus on UI/UX.</li>
+              <li>Created prototypes and wireframes in Adobe XD and Sketch.</li>
+              <li>SEO optimization and integration of payment and e-commerce systems.</li>
+            </ul>
+            <ul class="it">
+              <li>Sviluppo di siti responsive in HTML5, CSS3 e JavaScript, con attenzione a UI/UX.</li>
+              <li>Prototipi e wireframe con Adobe XD e Sketch.</li>
+              <li>Ottimizzazione SEO e integrazione di sistemi di pagamento ed e-commerce.</li>
+            </ul>
+          </div>
+        </article>
+        <article class="job film">
+          <div class="when"><span class="en">Mar 2016 – Dec 2019</span><span class="it">Mar 2016 – Dic 2019</span><span class="place">Bogotá</span></div>
+          <div>
+            <h3><span class="en">Colorist &amp; Video Editor</span><span class="it">Colorist e montatrice video</span></h3>
+            <div class="co">Bull Frame</div>
+            <ul class="en">
+              <li>Post-production, color correction and editing for documentaries, commercials and ad campaigns, working with directors and production teams.</li>
+              <li>DaVinci Resolve, Adobe Premiere Pro, After Effects, Illustrator.</li>
+            </ul>
+            <ul class="it">
+              <li>Post-produzione, color correction e montaggio per documentari, spot e campagne pubblicitarie, in collaborazione con registi e team di produzione.</li>
+              <li>DaVinci Resolve, Adobe Premiere Pro, After Effects, Illustrator.</li>
+            </ul>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="skills">
+    <div class="wrap">
+      <div class="head"><h2><span class="en">Toolkit</span><span class="it">Competenze</span></h2><span class="tc">01:04:51:09</span></div>
+      <div class="skills">
+        <div class="skill"><h3>Front-end</h3><div class="chips"><span class="chip">React</span><span class="chip">TypeScript</span><span class="chip">JavaScript ES6+</span><span class="chip">Hooks</span><span class="chip">HTML5</span><span class="chip">CSS3</span><span class="chip">Responsive</span></div></div>
+        <div class="skill"><h3>UI &amp; styling</h3><div class="chips"><span class="chip">Ant Design</span><span class="chip">StyleX</span><span class="chip">Cross-browser</span><span class="chip">Adobe XD</span><span class="chip">Sketch</span></div></div>
+        <div class="skill"><h3><span class="en">Architecture</span><span class="it">Architettura</span></h3><div class="chips"><span class="chip">OOP</span><span class="chip">Observer</span><span class="chip">Factory</span><span class="chip">Singleton</span><span class="chip">Container/Presentational</span><span class="chip">HOC</span><span class="chip">NX monorepo</span></div></div>
+        <div class="skill"><h3><span class="en">Back-end &amp; data</span><span class="it">Back-end e dati</span></h3><div class="chips"><span class="chip">Java</span><span class="chip">Python</span><span class="chip">MySQL</span><span class="chip">PostgreSQL</span><span class="chip">NoSQL</span><span class="chip">REST APIs</span></div></div>
+        <div class="skill"><h3>Cloud &amp; DevOps</h3><div class="chips"><span class="chip">AWS Lambda</span><span class="chip">Step Functions</span><span class="chip">S3</span><span class="chip">EC2</span><span class="chip">RDS</span><span class="chip">DynamoDB</span><span class="chip">CloudWatch</span><span class="chip">CI/CD</span><span class="chip">Terraform</span></div></div>
+        <div class="skill"><h3><span class="en">Ways of working</span><span class="it">Metodologie</span></h3><div class="chips"><span class="chip">Agile / Scrum</span><span class="chip">Code review</span><span class="chip"><span class="en">Technical docs</span><span class="it">Documentazione tecnica</span></span><span class="chip">Color grading</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="education">
+    <div class="wrap two">
+      <div>
+        <div class="head"><h2><span class="en">Education</span><span class="it">Formazione</span></h2></div>
+        <div class="edu">
+          <div class="edu-item">
+            <div class="when">2024 · Milano</div>
+            <h3>Talent Garden · Cloud AWS &amp; DevOps</h3>
+            <p class="en">Scalable cloud solutions on AWS: serverless with Lambda and Step Functions, CI/CD with CodePipeline and CodeBuild, Infrastructure as Code with CloudFormation and Terraform, IAM, VPC and Auto Scaling.</p>
+            <p class="it">Soluzioni cloud scalabili su AWS: serverless con Lambda e Step Functions, CI/CD con CodePipeline e CodeBuild, Infrastructure as Code con CloudFormation e Terraform, IAM, VPC e Auto Scaling.</p>
+          </div>
+          <div class="edu-item">
+            <div class="when">2020 · Milano</div>
+            <h3>Epicode · <span class="en">Front-end Developer</span><span class="it">Programmatrice Front-end</span></h3>
+          </div>
+          <div class="edu-item">
+            <div class="when">2015 – 2018 · Buenos Aires</div>
+            <h3>Universidad del Cine · <span class="en">Audiovisual Design</span><span class="it">Design audiovisivo</span></h3>
+            <p class="en">Colorist and audiovisual editor.</p>
+            <p class="it">Colorist e montatrice audiovisiva.</p>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="head"><h2><span class="en">Languages</span><span class="it">Lingue</span></h2></div>
+        <div class="langs">
+          <div class="lg-row"><div class="lg-top"><span><span class="en">Spanish</span><span class="it">Spagnolo</span></span><span><span class="en">Native</span><span class="it">Madrelingua</span></span></div><div class="meter"><i style="width:100%"></i></div></div>
+          <div class="lg-row"><div class="lg-top"><span><span class="en">Italian</span><span class="it">Italiano</span></span><span>C2</span></div><div class="meter"><i style="width:96%"></i></div></div>
+          <div class="lg-row"><div class="lg-top"><span><span class="en">English</span><span class="it">Inglese</span></span><span>C1</span></div><div class="meter"><i style="width:82%"></i></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" class="contact">
+    <div class="wrap">
+      <div class="head"><h2><span class="en">Let's talk</span><span class="it">Parliamone</span></h2></div>
+      <p class="lede en">Open to front-end and full-stack roles in Milan or remote.</p>
+      <p class="lede it">Disponibile per ruoli front-end e full-stack a Milano o da remoto.</p>
+      <div class="cards">
+        <div class="card"><div style="min-width:0"><div class="k">Email</div><div class="v" id="v-email">mariacamila.hdelatorre@gmail.com</div></div><button type="button" class="copy" id="copy-email" data-copy="v-email"><span class="en">Copy</span><span class="it">Copia</span></button></div>
+        <div class="card"><div style="min-width:0"><div class="k"><span class="en">Phone</span><span class="it">Telefono</span></div><div class="v" id="v-phone">+39 351 732 2003</div></div><button type="button" class="copy" id="copy-phone" data-copy="v-phone"><span class="en">Copy</span><span class="it">Copia</span></button></div>
+        <div class="card"><div style="min-width:0"><div class="k">LinkedIn</div><a class="v" href="https://www.linkedin.com/in/camila-delatorre-b55925175/" target="_blank" rel="noopener">camila-delatorre ↗</a></div></div>
+        <div class="card"><div style="min-width:0"><div class="k">GitHub</div><a class="v" href="https://github.com/Cami094" target="_blank" rel="noopener">Cami094 ↗</a></div></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span class="tc">© 2026 Camila Delatorre</span>
+    <span class="tc"><span class="en">Graded in Milano</span><span class="it">Graded a Milano</span> · Rec.709</span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  function setLang(l) {
+    root.setAttribute('data-lang', l);
+    root.lang = l;
+    document.getElementById('btn-en').setAttribute('aria-pressed', l === 'en');
+    document.getElementById('btn-it').setAttribute('aria-pressed', l === 'it');
+    try { localStorage.setItem('cd-lang', l); } catch (e) {}
+  }
+  var start = 'en';
+  if (location.hash === '#it') start = 'it';
+  else if (location.hash === '#en') start = 'en';
+  else { try { start = localStorage.getItem('cd-lang') || 'en'; } catch (e) {} }
+  setLang(start);
+  document.querySelectorAll('[data-set]').forEach(function (b) {
+    b.addEventListener('click', function () { setLang(b.dataset.set); });
+  });
+  window.addEventListener('hashchange', function () {
+    if (location.hash === '#it' || location.hash === '#en') setLang(location.hash.slice(1));
+  });
+
+  document.querySelectorAll('[data-copy]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var el = document.getElementById(btn.dataset.copy);
+      var text = el.textContent.trim();
+      var done = function () {
+        var it = root.getAttribute('data-lang') === 'it';
+        var old = btn.innerHTML;
+        btn.textContent = it ? 'Copiato' : 'Copied';
+        setTimeout(function () { btn.innerHTML = old; }, 1400);
+      };
+      var select = function () {
+        var r = document.createRange(); r.selectNodeContents(el);
+        var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+      };
+      try {
+        navigator.clipboard.writeText(text).then(done, select);
+      } catch (e) { select(); }
+    });
+  });
+
+  // Running timecode in the top bar (25 fps)
+  var tc = document.getElementById('tc');
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!reduce) {
+    var t0 = performance.now();
+    var pad = function (n) { return String(n).padStart(2, '0'); };
+    setInterval(function () {
+      var f = Math.floor((performance.now() - t0) / 40);
+      var fr = f % 25, s = Math.floor(f / 25) % 60, m = Math.floor(f / 1500) % 60;
+      tc.textContent = '01:' + pad(m) + ':' + pad(s) + ':' + pad(fr);
+    }, 40);
+  }
+})();
+</script>
+</body>
+</html>
